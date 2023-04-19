@@ -15,43 +15,44 @@ import java.util.*
 
 class RegisterController(private val call: ApplicationCall) {
 
-    suspend fun registerNewUser(){
+    suspend fun registerNewUser() {
         val registerReceiveRemote = call.receive<RegisterReceiveRemote>()
-        if (!registerReceiveRemote.email.isValidEmail()){
+        if (!registerReceiveRemote.email.isValidEmail()) {
             call.respond(HttpStatusCode.BadRequest, "Email is not valid")
-        }
-        val (isValid, message) = registerReceiveRemote.password.isValidPassword()
-        if (!isValid){
-            call.respond(HttpStatusCode.BadRequest, message)
         } else {
-            val userDTO = Users.fetchUser(registerReceiveRemote.email)
-
-            println("receive -> $registerReceiveRemote, dto -> $userDTO")
-
-            if (userDTO != null) {
-                call.respond(HttpStatusCode.Conflict, "User already exists")
+            val (isValid, message) = registerReceiveRemote.password.isValidPassword()
+            if (!isValid) {
+                call.respond(HttpStatusCode.BadRequest, message)
             } else {
-                val token = UUID.randomUUID().toString()
-                val rowId = UUID.randomUUID().toString()
-                try {
-                    Users.insert(
-                        UserDTO(
-                            password = registerReceiveRemote.password,
+                val userDTO = Users.fetchUser(registerReceiveRemote.email)
+
+                println("receive -> $registerReceiveRemote, dto -> $userDTO")
+
+                if (userDTO != null) {
+                    call.respond(HttpStatusCode.Conflict, "User already exists")
+                } else {
+                    val token = UUID.randomUUID().toString()
+                    val rowId = UUID.randomUUID().toString()
+                    try {
+                        Users.insert(
+                            UserDTO(
+                                password = registerReceiveRemote.password,
+                                email = registerReceiveRemote.email,
+                                username = ""
+                            )
+                        )
+                    } catch (e: ExposedSQLException) {
+                        call.respond(HttpStatusCode.Conflict, "User already exists")
+                    }
+                    Tokens.insert(
+                        TokenDTO(
+                            rowId = rowId,
                             email = registerReceiveRemote.email,
-                            username = ""
+                            token = token
                         )
                     )
-                } catch (e: ExposedSQLException) {
-                    call.respond(HttpStatusCode.Conflict, "User already exists")
+                    call.respond(RegisterResponseRemote(token = token))
                 }
-                Tokens.insert(
-                    TokenDTO(
-                        rowId = rowId,
-                        email = registerReceiveRemote.email,
-                        token = token
-                    )
-                )
-                call.respond(RegisterResponseRemote(token = token))
             }
         }
     }

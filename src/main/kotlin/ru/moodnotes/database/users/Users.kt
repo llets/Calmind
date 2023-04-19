@@ -1,6 +1,5 @@
 package ru.moodnotes.database.users
 
-import com.typesafe.config.ConfigException.Null
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -28,6 +27,14 @@ object Users: Table() {
         transaction {
             Users.update {
                 it[password] = userDTO.password
+            }
+        }
+    }
+
+    fun updateUsername(userDTO: UserDTO){
+        transaction {
+            Users.update {
+                it[username] = userDTO.username
             }
         }
     }
