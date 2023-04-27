@@ -30,12 +30,12 @@ class ChangePIController(private val call: ApplicationCall) {
                     } else {
                         Users.updatePassword(
                             UserDTO(
-                                email = "",
-                                username = "",
+                                email = changePasswordReceiveRemote.email,
+                                username = userDTO.username,
                                 password = changePasswordReceiveRemote.newPassword
                             )
                         )
-                        call.respond(ChangePasswordRespondRemote(isChanged = true))
+                        call.respond(HttpStatusCode.OK)
                     }
                 }
             } else{
@@ -46,23 +46,22 @@ class ChangePIController(private val call: ApplicationCall) {
 
     suspend fun changeUsername(){
         val changeUsernameReceiveRemote = call.receive<ChangeUsernameReceiveRemote>()
-        val userDTO = Users.fetchUser(changeUsernameReceiveRemote.oldUsername)
+        val userDTO = Users.fetchUser(changeUsernameReceiveRemote.email)
 
         println("receive -> $changeUsernameReceiveRemote, dto -> $userDTO")
 
         if (userDTO == null){
             call.respond(HttpStatusCode.BadRequest, "Something went wrong. " +
                     "Current user wasn't found in the database")
-            call.respond(ChangeUsernameRespondRemote(isChanged = false))
         } else {
             Users.updateUsername(
                 UserDTO(
-                    email = "",
+                    email = changeUsernameReceiveRemote.email,
                     username = changeUsernameReceiveRemote.newUsername,
-                    password = ""
+                    password = userDTO.password
                 )
             )
-            call.respond(ChangeUsernameRespondRemote(isChanged = true))
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

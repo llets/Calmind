@@ -5,6 +5,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.cio.*
 import org.jetbrains.exposed.sql.Database
 import ru.moodnotes.features.changePrivateInfo.configureChangePIRouting
+import ru.moodnotes.features.notification.configureReminderRouting
 import ru.moodnotes.plugins.*
 
 fun main() {
@@ -19,4 +20,5 @@ fun Application.module() {
     configureRegisterRouting()
     configureSerialization()
     configureChangePIRouting()
+    configureReminderRouting()
 }

@@ -25,7 +25,7 @@ object Users: Table() {
 
     fun updatePassword(userDTO: UserDTO){
         transaction {
-            Users.update {
+            Users.update({email eq userDTO.email}) {
                 it[password] = userDTO.password
             }
         }
@@ -33,7 +33,7 @@ object Users: Table() {
 
     fun updateUsername(userDTO: UserDTO){
         transaction {
-            Users.update {
+            Users.update({email eq userDTO.email}) {
                 it[username] = userDTO.username
             }
         }

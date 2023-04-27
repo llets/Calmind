@@ -4,7 +4,10 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import kotlinx.datetime.LocalTime
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import ru.moodnotes.database.reminders.ReminderDTO
+import ru.moodnotes.database.reminders.Reminders
 import ru.moodnotes.database.tokens.Tokens
 import ru.moodnotes.database.tokens.TokenDTO
 import ru.moodnotes.database.users.UserDTO
@@ -49,6 +52,13 @@ class RegisterController(private val call: ApplicationCall) {
                             rowId = rowId,
                             email = registerReceiveRemote.email,
                             token = token
+                        )
+                    )
+                    Reminders.setReminder(
+                        ReminderDTO(
+                            email = registerReceiveRemote.email,
+                            time = LocalTime(hour = 10, minute = 0),
+                            mode = true
                         )
                     )
                     call.respond(RegisterResponseRemote(token = token))
